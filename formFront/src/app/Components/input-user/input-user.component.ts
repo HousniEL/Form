@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-input-user',
@@ -12,7 +14,7 @@ export class InputUserComponent implements OnInit {
   registered = false;
   userForm !: FormGroup;
 
-  constructor(private formBuilder : FormBuilder) { }
+  constructor(private formBuilder : FormBuilder,private httpClient : HttpClient, private router:Router) { }
 
   invalidUserName()
   {
@@ -39,7 +41,7 @@ export class InputUserComponent implements OnInit {
   	this.userForm = this.formBuilder.group({
   		username: ['', Validators.required],
   		email: ['', [Validators.required, Validators.email]],
-  		pword: ['', [Validators.required, Validators.pattern('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?/~_+-=|\]).{8,32}$')]],
+  		pword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(32), Validators.pattern('([a-zA-Z0-9]*)')]],
       cpword: ['', [Validators.required]]
     }, {
       validator: (formGroup:FormGroup) => {
@@ -67,10 +69,27 @@ export class InputUserComponent implements OnInit {
 
   	if(this.userForm.invalid == true)
   	{
+      console.log(this.userForm.controls.pword.errors);
   		return;
   	}
   	else
   	{
+      let data : any = Object.assign({uid: "2"}, this.userForm.value);
+      // We don't need the password confirmation
+      let clefs = Object.keys(data);
+      let obj : any = {};
+      for(let clef of clefs){
+        let descriptor = Object.getOwnPropertyDescriptor(data, clef);
+        if( clef != "cpword" ){
+          obj[clef] = descriptor?.value;
+        }
+      }
+        this.httpClient.post("/api/v1/users", obj).subscribe((obs) => {
+          let path = "/user/" + obj.uid;
+          this.router.navigate([path]);
+        },(error) => {
+          console.log(error.error.message);
+        })
   		this.registered = true;
   	}
   }

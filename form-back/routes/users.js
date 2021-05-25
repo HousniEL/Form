@@ -3,10 +3,9 @@ var UserService = require('../services/userService');
 var router = express.Router();
 
 // Create
-router.get('/', async function(req, res, next) {
-  var user = { uid : "1", username : "Housni", email : "xxx@yyy.com", pword : "12ds$c12" };
+router.post('/', async function(req, res, next) {
   try {
-    var utili = await UserService.create(user);
+    var utili = await UserService.create(req.body);
     return res.status(201).json(utili);
   } catch (err) {
     if( err.name === "ValidationError" ){

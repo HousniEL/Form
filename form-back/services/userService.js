@@ -8,7 +8,7 @@ const userValidator = new Validator();
 var userList = {};
 
 /* use the same patterns as on the client to validate the request */
-const passwordPattern = /^([a-z])*([A-Z])*([0-9])*([!@#\$%\^&\*])*(?=.{8,32})/;
+const passwordPattern = /^([a-zA-Z0-9!@#\$%\^&\*]{6})/;
 
 const userSchema = {
     uid : { type : "string" },
@@ -19,6 +19,7 @@ const userSchema = {
 
 class UserService {
     static create(data) {
+        console.log(data);
         var vres = userValidator.validate(data, userSchema);
         // validation failed 
 		if(!(vres === true))
